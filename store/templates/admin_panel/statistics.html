@@ -1,0 +1,228 @@
+<!-- store/templates/admin_panel/statistics.html -->
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Estadísticas - Panel Administrador{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Estadísticas</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'store:admin_dashboard' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Volver al Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos principales -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Pedidos por Día (Últimos 7 días)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="ordersChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Ingresos por Día (Últimos 7 días)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Productos más vendidos -->
+<div class="row mb-4">
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Productos Más Vendidos</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Posición</th>
+                                <th>Producto</th>
+                                <th>Cantidad Vendida</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in top_products %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ product.product__name }}</td>
+                                <td>{{ product.total_quantity }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center">No hay datos disponibles.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Distribución de Estados</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Actualización de la plantilla de estadísticas -->
+<!-- KPIs generales -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">KPIs Generales</h5>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-2">
+                <div class="border-end">
+                    <h6 class="text-muted">Total de Pedidos</h6>
+                    <h3>{{ total_orders }}</h3>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="border-end">
+                    <h6 class="text-muted">Pedidos Completados</h6>
+                    <h3>{{ completed_orders_count }}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="border-end">
+                    <h6 class="text-muted">Ingresos Totales</h6>
+                    <h3>${{ total_revenue }}</h3>
+                    <small class="text-muted">(solo pedidos completados)</small>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="border-end">
+                    <h6 class="text-muted">Ticket Promedio</h6>
+                    <h3>${{ average_ticket|floatformat:2 }}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div>
+                    <h6 class="text-muted">Productos Vendidos</h6>
+                    <h3>{{ total_products_sold }}</h3>
+                    <small class="text-muted">(solo pedidos completados)</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preparar datos para los gráficos
+    const dailyOrders = JSON.parse('{{ daily_orders|escapejs }}');
+    const dailyRevenue = JSON.parse('{{ daily_revenue|escapejs }}');
+    
+    // Gráfico de pedidos por día
+    const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+    new Chart(ordersCtx, {
+        type: 'bar',
+        data: {
+            labels: dailyOrders.map(item => item.date),
+            datasets: [{
+                label: 'Número de Pedidos',
+                data: dailyOrders.map(item => item.count),
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    precision: 0
+                }
+            }
+        }
+    });
+    
+    // Gráfico de ingresos por día
+    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: dailyRevenue.map(item => item.date),
+            datasets: [{
+                label: 'Ingresos ($)',
+                data: dailyRevenue.map(item => item.amount),
+                fill: false,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Gráfico de distribución de estados
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    const statuses = JSON.parse('{{ status_distribution|escapejs }}');
+    
+    // Mapear nombres de estados para mostrar en español
+    const statusNames = {
+        'pending': 'Pendientes',
+        'processing': 'En Proceso',
+        'completed': 'Completados'
+    };
+    
+    // Colores para cada estado
+    const statusColors = {
+        'pending': 'rgba(255, 193, 7, 0.8)',
+        'processing': 'rgba(23, 162, 184, 0.8)',
+        'completed': 'rgba(40, 167, 69, 0.8)'
+    };
+    
+    new Chart(statusCtx, {
+        type: 'pie',
+        data: {
+            labels: statuses.map(item => statusNames[item.status] || item.status),
+            datasets: [{
+                data: statuses.map(item => item.count),
+                backgroundColor: statuses.map(item => statusColors[item.status] || 'rgba(108, 117, 125, 0.8)'),
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

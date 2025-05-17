@@ -1,0 +1,129 @@
+<!-- store/templates/store/cart.html -->
+{% extends 'store/base.html' %}
+
+{% block title %}Carrito de Compras - Jugos Candy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Carrito de Compras</h1>
+    
+    {% if cart_items %}
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Items en tu carrito</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th scope="col" width="60">Producto</th>
+                                    <th scope="col">Nombre</th>
+                                    <th scope="col">Precio</th>
+                                    <th scope="col">Cantidad</th>
+                                    <th scope="col">Subtotal</th>
+                                    <th scope="col">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in cart_items %}
+                                <tr>
+                                    <td>
+                                        {% if item.product.image %}
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-thumbnail" width="50">
+                                        {% else %}
+                                        <i class="fas fa-blender fa-2x text-secondary"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'store:product_detail' item.product.id %}">{{ item.product.name }}</a>
+                                    </td>
+                                    <td>${{ item.product.price }}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'store:update_cart' item.product.id %}" class="d-flex">
+                                            {% csrf_token %}
+                                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="10" class="form-control form-control-sm" style="width: 70px;">
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary ms-2">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>${{ item.subtotal }}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'store:remove_from_cart' item.product.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'store:product_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i> Seguir comprando
+                </a>
+                <form method="post" action="{% url 'store:cart' %}">
+                    {% csrf_token %}
+                    <button type="submit" name="clear_cart" class="btn btn-outline-danger">
+                        <i class="fas fa-trash me-2"></i> Vaciar carrito
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Resumen del pedido</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Subtotal:</span>
+                        <span>${{ total }}</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3 fw-bold">
+                        <span>Total:</span>
+                        <span>${{ total }}</span>
+                    </div>
+                    <a href="{% url 'store:checkout' %}" class="btn btn-success w-100">
+                        Proceder al Checkout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+            <h3>Tu carrito está vacío</h3>
+            <p class="mb-4">¡Agrega algunos de nuestros deliciosos productos a tu carrito!</p>
+            <a href="{% url 'store:product_list' %}" class="btn btn-success">
+                <i class="fas fa-shopping-bag me-2"></i> Ver Productos
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Actualizar el carrito automáticamente cuando cambia la cantidad
+        $('input[name="quantity"]').on('change', function() {
+            $(this).closest('form').submit();
+        });
+    });
+</script>
+{% endblock %}

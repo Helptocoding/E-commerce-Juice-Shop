@@ -1,0 +1,520 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Jugos Candy - Inicio{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Banner principal mejorado con overlay y diseño más moderno -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-success text-white banner-card">
+                <div class="banner-background"></div>
+                <div class="card-body p-5">
+                    <div class="row align-items-center">
+                        <div class="col-lg-7 col-md-8">
+                            <h1 class="display-4 fw-bold">Sabor & Frescura Natural</h1>
+                            <p class="lead mb-4">Jugos 100% naturales elaborados diariamente con frutas y verduras de temporada para llenar tu día de energía y vitalidad.</p>
+                            <div class="d-flex gap-3 mt-4">
+                                <a href="{% url 'store:product_list' %}" class="btn btn-light btn-lg">
+                                    <i class="fas fa-apple-alt"></i> Ver Productos
+                                </a>
+                                <a href="{% url 'store:product_list' %}" class="btn btn-outline-light btn-lg">
+                                    <i class="fas fa-star"></i> Destacados
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-lg-5 col-md-4 d-none d-md-block text-center">
+                            <div class="banner-icon-container">
+                                <i class="fas fa-blender fa-5x mb-3"></i>
+                                <div class="floating-icons">
+                                    <span class="floating-icon"><i class="fas fa-apple-alt fa-2x"></i></span>
+                                    <span class="floating-icon"><i class="fas fa-carrot fa-2x"></i></span>
+                                    <span class="floating-icon"><i class="fas fa-lemon fa-2x"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Características destacadas antes de categorías -->
+    <div class="features-section mb-5">
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-leaf fa-3x text-success"></i>
+                    </div>
+                    <h4 class="mt-4">100% Natural</h4>
+                    <p class="mb-0">Sin conservadores, sin azúcares añadidos, solo la frescura natural de las frutas.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-truck fa-3x text-success"></i>
+                    </div>
+                    <h4 class="mt-4">Pedido Express</h4>
+                    <p class="mb-0">Ordena online y recoge tu pedido en tienda sin filas ni esperas.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon-wrapper">
+                        <i class="fas fa-heart fa-3x text-success"></i>
+                    </div>
+                    <h4 class="mt-4">Vida Saludable</h4>
+                    <p class="mb-0">Vitaminas y antioxidantes para mantener tu cuerpo fuerte y saludable.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    <!-- Productos destacados con diseño de grid mejorado -->
+    <div id="productos-destacados" class="section-header mb-4">
+        <h2>Nuestros Productos Destacados</h2>
+        <p class="text-muted">Los favoritos de nuestros clientes, preparados con ingredientes premium</p>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+        {% for product in featured_products %}
+        <div class="col">
+            <div class="card h-100 shadow-sm product-card">
+                {% if product.image %}
+                <div class="product-image-container">
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                    <div class="product-badge">Destacado</div>
+                </div>
+                {% else %}
+                <div class="text-center p-4 bg-light product-image-container">
+                    <i class="fas fa-blender fa-5x text-secondary"></i>
+                    <div class="product-badge">Destacado</div>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <div class="product-rating mb-2">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <p class="card-text">{{ product.description|truncatechars:100 }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <span class="fs-4 fw-bold text-success">${{ product.price }}</span>
+                        <a href="{% url 'store:product_detail' product.id %}" class="btn btn-sm btn-outline-primary">
+                            Ver Detalles
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-top-0">
+                    <form method="post" action="{% url 'store:add_to_cart' product.id %}" class="add-to-cart-form d-flex justify-content-between align-items-center">
+                        {% csrf_token %}
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-cart-plus"></i> Agregar al carrito
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">No hay productos destacados disponibles en este momento.</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Categorías con nuevo diseño de tarjetas -->
+    <div class="section-header mb-4">
+        <h2>Explora Nuestras Categorías</h2>
+        <p class="text-muted">Encuentra el jugo perfecto para cada momento del día</p>
+    </div>
+    
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+        {% for category in categories %}
+        <div class="col">
+            <div class="card h-100 shadow-sm category-card">
+                <div class="card-body text-center">
+                    <div class="category-icon mb-3">
+                        {% if category.name == 'Frutas' or category.name == 'Frutales' %}
+                            <i class="fas fa-apple-alt fa-3x"></i>
+                        {% elif category.name == 'Verduras' or category.name == 'Vegetales' %}
+                            <i class="fas fa-carrot fa-3x"></i>
+                        {% elif category.name == 'Detox' or category.name == 'Desintoxicantes' %}
+                            <i class="fas fa-tint fa-3x"></i>
+                        {% elif category.name == 'Proteicos' or category.name == 'Proteínas' %}
+                            <i class="fas fa-dumbbell fa-3x"></i>
+                        {% elif category.name == 'Energéticos' or category.name == 'Energía' %}
+                            <i class="fas fa-bolt fa-3x"></i>
+                        {% else %}
+                            <i class="fas fa-glass-whiskey fa-3x"></i>
+                        {% endif %}
+                    </div>
+                    <h5 class="card-title">{{ category.name }}</h5>
+                    <p class="card-text">{{ category.description|default:"Descubre nuestra selección de jugos en esta categoría" }}</p>
+                    <a href="{% url 'store:category_products' category.id %}" class="btn btn-outline-success">
+                        Explorar <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">No hay categorías disponibles en este momento.</div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Sección de testimonios (nueva) -->
+    <div class="testimonials-section my-5 py-5">
+        <div class="section-header text-center mb-5">
+            <h2>Lo Que Dicen Nuestros Clientes</h2>
+            <p class="text-muted">Personas que disfrutan de nuestros jugos a diario</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"Los jugos son increíblemente frescos. Se nota la calidad de las frutas y la dedicación en cada preparación."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">
+                            <i class="fas fa-user-circle fa-3x"></i>
+                        </div>
+                        <div class="testimonial-info">
+                            <h5 class="mb-0">Laura Martínez</h5>
+                            <small class="text-muted">Cliente desde 2023</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"Desde que empecé a tomar sus jugos detox, noto más energía y mejor digestión. ¡Ya son parte de mi rutina diaria!"</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">
+                            <i class="fas fa-user-circle fa-3x"></i>
+                        </div>
+                        <div class="testimonial-info">
+                            <h5 class="mb-0">Carlos Jiménez</h5>
+                            <small class="text-muted">Cliente desde 2022</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <p>"La app para pedidos funciona perfectamente. Hago mi pedido antes de salir de la oficina y cuando llego ya está listo."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">
+                            <i class="fas fa-user-circle fa-3x"></i>
+                        </div>
+                        <div class="testimonial-info">
+                            <h5 class="mb-0">Ana Rodríguez</h5>
+                            <small class="text-muted">Cliente desde 2024</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Banner de suscripción (nuevo) -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card newsletter-card">
+                <div class="card-body py-5">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 mb-4 mb-lg-0">
+                            <h3 class="mb-3">¿Quieres recibir ofertas exclusivas?</h3>
+                            <p class="mb-0">Suscríbete a nuestro boletín y recibe promociones, recetas saludables y contenido exclusivo.</p>
+                        </div>
+                        <div class="col-lg-6">
+                            <form class="d-flex newsletter-form">
+                                <input type="email" class="form-control me-2" placeholder="Tu correo electrónico">
+                                <button type="submit" class="btn btn-success">Suscribirse</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos específicos para home.html */
+    
+    /* Banner principal */
+    .banner-card {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(56, 178, 73, 0.8), rgba(45, 157, 62, 0.9)) !important;
+        border: none;
+    }
+    
+    .banner-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url('https://images.unsplash.com/photo-1622597467836-f3e6707e1666?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80');
+        background-size: cover;
+        background-position: center;
+        opacity: 0.3;
+        z-index: 0;
+    }
+    
+    .banner-card .card-body {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .banner-icon-container {
+        position: relative;
+        display: inline-block;
+        z-index: 1;
+    }
+    
+    .floating-icons {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .floating-icon {
+        position: absolute;
+        animation: float 3s infinite ease-in-out;
+    }
+    
+    .floating-icon:nth-child(1) {
+        top: 20%;
+        left: 0;
+        animation-delay: 0s;
+    }
+    
+    .floating-icon:nth-child(2) {
+        top: 40%;
+        right: 10%;
+        animation-delay: 0.5s;
+    }
+    
+    .floating-icon:nth-child(3) {
+        bottom: 10%;
+        left: 20%;
+        animation-delay: 1s;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+    }
+    
+    /* Sección de características */
+    .features-section {
+        margin-top: -20px;
+        z-index: 10;
+        position: relative;
+    }
+    
+    .feature-card {
+        background-color: white;
+        border-radius: var(--card-radius, 0.75rem);
+        padding: 2rem;
+        height: 100%;
+        box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .feature-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: rgba(56, 178, 73, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    
+    /* Encabezados de sección */
+    .section-header {
+        position: relative;
+        margin-bottom: 2rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .section-header h2 {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .section-header h2::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: #38b249;
+        border-radius: 3px;
+    }
+    
+    /* Tarjetas de categoría */
+    .category-card {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-10px);
+    }
+    
+    .category-icon {
+        color: #38b249;
+        margin-bottom: 1rem;
+    }
+    
+    /* Tarjetas de producto */
+    .product-card {
+        border-radius: 0.75rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .product-image-container {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .product-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background-color: #ff7e36;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 20px;
+        z-index: 1;
+    }
+    
+    .product-rating {
+        color: #ffc107;
+    }
+    
+    /* Testimonios */
+    .testimonials-section {
+        background-color: rgba(56, 178, 73, 0.1);
+        border-radius: 0.75rem;
+        padding: 3rem 0;
+    }
+    
+    .testimonial-card {
+        background-color: white;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.08);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.3s ease;
+    }
+    
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .testimonial-content {
+        flex-grow: 1;
+        margin-bottom: 1.5rem;
+    }
+    
+    .testimonial-content p {
+        font-style: italic;
+        position: relative;
+        margin-bottom: 0;
+    }
+    
+    .testimonial-content p::before,
+    .testimonial-content p::after {
+        content: '"';
+        color: #38b249;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+    }
+    
+    .testimonial-avatar {
+        margin-right: 1rem;
+        color: #6c757d;
+    }
+    
+    /* Banner de suscripción */
+    .newsletter-card {
+        background-color: rgba(56, 178, 73, 0.1);
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+    
+    .newsletter-form .form-control {
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .display-4 {
+            font-size: 2.5rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1.75rem;
+        }
+        
+        .newsletter-form {
+            flex-direction: column;
+        }
+        
+        .newsletter-form .form-control {
+            margin-right: 0;
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}

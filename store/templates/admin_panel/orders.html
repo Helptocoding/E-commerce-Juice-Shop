@@ -1,0 +1,130 @@
+<!-- store/templates/admin_panel/orders.html -->
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Pedidos - Panel Administrador{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Gestión de Pedidos</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'store:admin_dashboard' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Volver al Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Filtros</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="btn-group w-100" role="group">
+                    <a href="{% url 'store:admin_orders' %}" class="btn btn-outline-secondary {% if not status_filter %}active{% endif %}">
+                        Todos
+                    </a>
+                    <a href="{% url 'store:admin_orders' %}?status=pending" class="btn btn-outline-warning {% if status_filter == 'pending' %}active{% endif %}">
+                        Pendientes <span class="badge bg-secondary ms-1" id="filter-pending-count">{{ pending_count }}</span>
+                    </a>
+                    <a href="{% url 'store:admin_orders' %}?status=processing" class="btn btn-outline-info {% if status_filter == 'processing' %}active{% endif %}">
+                        En proceso <span class="badge bg-secondary ms-1" id="filter-processing-count">{{ processing_count }}</span>
+                    </a>
+                    <a href="{% url 'store:admin_orders' %}?status=completed" class="btn btn-outline-success {% if status_filter == 'completed' %}active{% endif %}">
+                        Completados <span class="badge bg-secondary ms-1" id="filter-completed-count">{{ completed_count }}</span>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <form method="get" class="d-flex">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar por nombre o folio...">
+                    <button type="submit" class="btn btn-primary ms-2">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de pedidos -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            {% if status_filter %}
+                {% if status_filter == 'pending' %}
+                    Pedidos Pendientes
+                {% elif status_filter == 'processing' %}
+                    Pedidos En Proceso
+                {% elif status_filter == 'completed' %}
+                    Pedidos Completados
+                {% endif %}
+            {% else %}
+                Todos los Pedidos
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped" id="orders-table">
+                <thead>
+                    <tr>
+                        <th>Folio</th>
+                        <th>Cliente</th>
+                        <th>Teléfono</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.order_number }}</td>
+                        <td>{{ order.customer_name }}</td>
+                        <td>{{ order.customer_phone }}</td>
+                        <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                        <td>${{ order.total_amount }}</td>
+                        <td>
+                            {% if order.status == 'pending' %}
+                            <span class="badge bg-warning">Pendiente</span>
+                            {% elif order.status == 'processing' %}
+                            <span class="badge bg-info">En proceso</span>
+                            {% elif order.status == 'completed' %}
+                            <span class="badge bg-success">Completado</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'store:admin_order_detail' order.order_number %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'store:admin_update_order' order.order_number %}" class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="mb-0">No hay pedidos que mostrar.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin.js' %}"></script>
+{% endblock %}

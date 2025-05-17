@@ -1,0 +1,93 @@
+<!-- store/templates/store/product_detail.html -->
+{% extends 'store/base.html' %}
+
+{% block title %}{{ product.name }} - Jugos Candy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'store:home' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'store:product_list' %}">Productos</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'store:category_products' product.category.id %}">{{ product.category.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Imagen del producto -->
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-sm">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" class="card-img-top img-fluid" alt="{{ product.name }}">
+                {% else %}
+                <div class="text-center p-5 bg-light">
+                    <i class="fas fa-blender fa-7x text-secondary"></i>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Detalles del producto -->
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h1 class="mb-3">{{ product.name }}</h1>
+                    <p class="fs-4 fw-bold text-success mb-3">${{ product.price }}</p>
+                    <p class="mb-4">{{ product.description }}</p>
+                    <p><strong>Categoría:</strong> {{ product.category.name }}</p>
+                    
+                    <!-- Correción para product_detail.html -->
+
+                    <form method="post" action="{% url 'store:add_to_cart' product.id %}" class="add-to-cart-form mt-4">
+                        {% csrf_token %}
+                        <div class="row g-3 align-items-center mb-3">
+                            <div class="col-auto">
+                                <label for="quantity" class="col-form-label">Cantidad:</label>
+                            </div>
+                            <div class="col-3">
+                                <input type="number" id="quantity" name="quantity" class="form-control" value="1" min="1" max="10">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-cart-plus me-2"></i> Agregar al carrito
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Productos relacionados -->
+    {% if related_products %}
+    <div class="mt-5">
+        <h3 class="mb-4">También te puede interesar</h3>
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            {% for related in related_products %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    {% if related.image %}
+                    <img src="{{ related.image.url }}" class="card-img-top" alt="{{ related.name }}">
+                    {% else %}
+                    <div class="text-center p-3 bg-light">
+                        <i class="fas fa-blender fa-3x text-secondary"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ related.name }}</h5>
+                        <p class="card-text">{{ related.description|truncatechars:60 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-5 fw-bold text-success">${{ related.price }}</span>
+                            <a href="{% url 'store:product_detail' related.id %}" class="btn btn-sm btn-outline-primary">
+                                Ver Detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

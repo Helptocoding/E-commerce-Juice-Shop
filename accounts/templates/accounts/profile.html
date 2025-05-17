@@ -1,0 +1,96 @@
+<!-- accounts/templates/accounts/profile.html -->
+{% extends 'store/base.html' %}
+
+{% block title %}Mi Perfil - Jugos Candy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Mi Perfil</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-circle fa-5x text-muted"></i>
+                        <h4 class="mt-3">{{ user.get_full_name }}</h4>
+                        <p class="text-muted">{{ user.username }}</p>
+                    </div>
+                    <div>
+                        <p><strong>Correo:</strong> {{ user.email }}</p>
+                        <p><strong>Miembro desde:</strong> {{ user.date_joined|date:"d/m/Y" }}</p>
+                        {% if user.profile.phone %}
+                        <p><strong>Teléfono:</strong> {{ user.profile.phone }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="#" class="btn btn-outline-primary">
+                            <i class="fas fa-edit me-2"></i> Editar Perfil
+                        </a>
+                        <a href="{% url 'accounts:logout' %}" class="btn btn-outline-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Mis Pedidos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Folio</th>
+                                    <th>Fecha</th>
+                                    <th>Total</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in user.order_set.all %}
+                                <tr>
+                                    <td>{{ order.order_number }}</td>
+                                    <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                                    <td>${{ order.total_amount }}</td>
+                                    <td>
+                                        {% if order.status == 'pending' %}
+                                        <span class="badge bg-warning">Pendiente</span>
+                                        {% elif order.status == 'processing' %}
+                                        <span class="badge bg-info">En proceso</span>
+                                        {% elif order.status == 'completed' %}
+                                        <span class="badge bg-success">Completado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="#" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">
+                                        <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                                        <p class="mb-0">No tienes pedidos aún.</p>
+                                        <a href="{% url 'store:product_list' %}" class="btn btn-outline-success mt-3">
+                                            <i class="fas fa-shopping-basket me-2"></i> Ir a comprar
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

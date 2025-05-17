@@ -1,0 +1,44 @@
+<!-- store/templates/store/order_confirmation.html -->
+{% extends 'store/base.html' %}
+
+{% block title %}Confirmación de Pedido - Jugos Candy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center p-5">
+                    <i class="fas fa-check-circle fa-5x text-success mb-4"></i>
+                    <h1 class="mb-3">¡Pedido Confirmado!</h1>
+                    <p class="lead mb-4">Gracias por tu pedido. Hemos recibido tu solicitud y la estamos procesando.</p>
+                    
+                    <div class="alert alert-info mb-4">
+                        <h4 class="alert-heading mb-3">Número de Pedido:</h4>
+                        <p class="fs-3 fw-bold mb-0">{{ order.order_number }}</p>
+                    </div>
+                    
+                    <p class="mb-4">
+                        Por favor, muestra este número de pedido cuando llegues a nuestra tienda para recoger y pagar tu pedido.
+                    </p>
+                    
+                    <div class="mb-4">
+                        <h5>Detalles del Pedido:</h5>
+                        <p><strong>Nombre:</strong> {{ order.customer_name }}</p>
+                        <p><strong>Email:</strong> {{ order.customer_email }}</p>
+                        <p><strong>Teléfono:</strong> {{ order.customer_phone }}</p>
+                        <p><strong>Fecha:</strong> {{ order.created_at|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Total:</strong> ${{ order.total_amount }}</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'store:home' %}" class="btn btn-success btn-lg">
+                            <i class="fas fa-home me-2"></i> Volver al Inicio
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

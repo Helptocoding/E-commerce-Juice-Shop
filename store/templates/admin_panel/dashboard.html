@@ -1,0 +1,90 @@
+<!-- store/templates/admin_panel/dashboard.html -->
+{% extends 'admin_panel/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Panel Administrador{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <a href="{% url 'store:admin_orders' %}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-list me-1"></i> Ver todos los pedidos
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Tarjetas de resumen -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-warning text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Pedidos Pendientes</h5>
+                        <h2 class="display-4 mb-0" id="pending-orders-count">{{ pending_orders }}</h2>
+                    </div>
+                    <i class="fas fa-clock fa-3x"></i>
+                </div>
+                <a href="{% url 'store:admin_orders' %}?status=pending" class="btn btn-sm btn-light mt-3">Ver pedidos</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">En Proceso</h5>
+                        <h2 class="display-4 mb-0" id="processing-orders-count">{{ processing_orders }}</h2>
+                    </div>
+                    <i class="fas fa-cog fa-3x fa-spin"></i>
+                </div>
+                <a href="{% url 'store:admin_orders' %}?status=processing" class="btn btn-sm btn-light mt-3">Ver pedidos</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Completados</h5>
+                        <h2 class="display-4 mb-0" id="completed-orders-count">{{ completed_orders }}</h2>
+                    </div>
+                    <i class="fas fa-check-circle fa-3x"></i>
+                </div>
+                <a href="{% url 'store:admin_orders' %}?status=completed" class="btn btn-sm btn-light mt-3">Ver pedidos</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas del día -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Acciones rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'store:admin_orders' %}?status=pending" class="btn btn-outline-warning">
+                        <i class="fas fa-list-alt me-2"></i> Gestionar pedidos pendientes
+                    </a>
+                    <a href="{% url 'store:admin_statistics' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-chart-line me-2"></i> Ver estadísticas completas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Últimos pedidos -->
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,52 @@
+<!-- accounts/templates/accounts/register.html -->
+{% extends 'store/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Registro - Jugos Candy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white text-center py-3">
+                    <h3 class="mb-0">Crear una Cuenta</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.first_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.last_name|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.username|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.email|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.password1|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.password2|as_crispy_field }}
+                        </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-user-plus me-2"></i> Registrarse
+                            </button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <p>¿Ya tienes una cuenta? <a href="{% url 'accounts:login' %}">Inicia sesión aquí</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

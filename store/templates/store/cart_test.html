@@ -1,0 +1,318 @@
+<!-- store/templates/store/cart_test.html -->
+{% extends 'store/base.html' %}
+{% load static %}
+
+{% block title %}Prueba de Carrito - Jugos Frescos{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Página de Prueba del Carrito</h2>
+                </div>
+                <div class="card-body">
+                    <p>Esta página se utiliza para probar la funcionalidad del carrito de compras y diagnosticar problemas.</p>
+                    <div class="alert alert-info">
+                        <h5>Estado del Sistema</h5>
+                        <p><strong>JavaScript:</strong> <span id="js-status">Verificando...</span></p>
+                        <p><strong>AJAX:</strong> <span id="ajax-status">Verificando...</span></p>
+                        <p><strong>Carrito JS:</strong> <span id="cart-js-status">Verificando...</span></p>
+                        <p><strong>Formularios:</strong> <span id="forms-status">Verificando...</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Productos de Prueba</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-1 row-cols-md-3 g-4">
+                        {% for product in products %}
+                        <div class="col">
+                            <div class="card h-100 product-card">
+                                {% if product.image %}
+                                <div class="product-image-container">
+                                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                                </div>
+                                {% else %}
+                                <div class="text-center p-3 bg-light product-image-container">
+                                    <i class="fas fa-blender fa-5x text-secondary"></i>
+                                </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                    <p class="card-text small">{{ product.description|truncatechars:60 }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fs-5 fw-bold text-success">${{ product.price }}</span>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-top-0">
+                                    <!-- Formulario 1: Con clase add-to-cart-form -->
+                                    <form method="post" action="{% url 'store:add_to_cart' product.id %}" class="add-to-cart-form mb-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-success w-100">
+                                            <i class="fas fa-cart-plus"></i> Agregar (Clase)
+                                        </button>
+                                    </form>
+                                    
+                                    <!-- Formulario 2: Con URL completa -->
+                                    <form method="post" action="/carrito/agregar/{{ product.id }}/" class="mb-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-outline-success w-100">
+                                            <i class="fas fa-cart-plus"></i> Agregar (URL)
+                                        </button>
+                                    </form>
+                                    
+                                    <!-- Formulario 3: Con atributo data -->
+                                    <form method="post" action="{% url 'store:add_to_cart' product.id %}" data-product-id="{{ product.id }}" class="cart-add-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-outline-primary w-100">
+                                            <i class="fas fa-cart-plus"></i> Agregar (Data)
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <div class="alert alert-warning">
+                                No hay productos disponibles para pruebas.
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Opciones</h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <button id="test-ajax" class="btn btn-primary">
+                            <i class="fas fa-sync-alt me-2"></i> Probar AJAX
+                        </button>
+                        <button id="clear-cart" class="btn btn-warning">
+                            <i class="fas fa-trash me-2"></i> Vaciar Carrito
+                        </button>
+                        <button id="reload-js" class="btn btn-info">
+                            <i class="fas fa-redo me-2"></i> Recargar JavaScript
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Console Log</h3>
+                </div>
+                <div class="card-body">
+                    <div class="border p-3 bg-light" style="height: 300px; overflow-y: auto;">
+                        <pre id="console-log" class="mb-0"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Script de diagnóstico
+    document.addEventListener('DOMContentLoaded', function() {
+        // Referencias a elementos de estado
+        const jsStatus = document.getElementById('js-status');
+        const ajaxStatus = document.getElementById('ajax-status');
+        const cartJsStatus = document.getElementById('cart-js-status');
+        const formsStatus = document.getElementById('forms-status');
+        const consoleLog = document.getElementById('console-log');
+        
+        // Función para agregar al log
+        function logToConsole(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            consoleLog.innerHTML += `[${timestamp}] ${message}\n`;
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+            
+            // También log en la consola real
+            console.log(message);
+        }
+        
+        // Sobreescribir console.log para capturar mensajes
+        const originalLog = console.log;
+        console.log = function() {
+            // Llamar al log original
+            originalLog.apply(console, arguments);
+            
+            // Capturar y mostrar en nuestro log
+            const args = Array.from(arguments);
+            const message = args.map(arg => {
+                if (typeof arg === 'object') {
+                    try {
+                        return JSON.stringify(arg);
+                    } catch (e) {
+                        return String(arg);
+                    }
+                }
+                return String(arg);
+            }).join(' ');
+            
+            logToConsole(message);
+        };
+        
+        // Verificar JavaScript
+        jsStatus.innerHTML = '<span class="text-success">✓ Funcionando</span>';
+        logToConsole('✓ JavaScript funciona correctamente');
+        
+        // Verificar AJAX
+        const testAjax = function() {
+            logToConsole('Probando soporte AJAX...');
+            
+            if (window.fetch) {
+                fetch('{% url "store:home" %}')
+                    .then(response => {
+                        if (response.ok) {
+                            ajaxStatus.innerHTML = '<span class="text-success">✓ Soportado</span>';
+                            logToConsole('✓ AJAX (fetch) funciona correctamente');
+                        } else {
+                            ajaxStatus.innerHTML = '<span class="text-warning">⚠ Respuesta no OK</span>';
+                            logToConsole('⚠ AJAX devuelve respuesta no OK: ' + response.status);
+                        }
+                    })
+                    .catch(error => {
+                        ajaxStatus.innerHTML = '<span class="text-danger">✗ Error</span>';
+                        logToConsole('✗ Error AJAX: ' + error.message);
+                    });
+            } else {
+                ajaxStatus.innerHTML = '<span class="text-danger">✗ No soportado</span>';
+                logToConsole('✗ Este navegador no soporta fetch API');
+            }
+        };
+        
+        // Verificar si cart.js está cargado
+        setTimeout(() => {
+            if (window.addToCartForms !== undefined || document.querySelector('form.add-to-cart-form').hasAttribute('data-cart-js-attached')) {
+                cartJsStatus.innerHTML = '<span class="text-success">✓ Cargado</span>';
+                logToConsole('✓ cart.js parece estar cargado y funcionando');
+            } else {
+                cartJsStatus.innerHTML = '<span class="text-warning">⚠ Estado incierto</span>';
+                logToConsole('⚠ No se puede verificar si cart.js está funcionando correctamente');
+                
+                // Marcar los formularios para verificar después
+                document.querySelectorAll('form.add-to-cart-form').forEach(form => {
+                    form.setAttribute('data-cart-js-attached', 'pending');
+                });
+            }
+        }, 500);
+        
+        // Verificar formularios
+        const forms = document.querySelectorAll('form[action^="/carrito/agregar/"], .add-to-cart-form, form[action*="add_to_cart"]');
+        if (forms.length > 0) {
+            formsStatus.innerHTML = '<span class="text-success">✓ ' + forms.length + ' formularios encontrados</span>';
+            logToConsole('✓ ' + forms.length + ' formularios de carrito encontrados');
+            
+            // Verificar si los formularios tienen event listeners
+            setTimeout(() => {
+                // Prueba de envío simulado
+                const testForm = forms[0];
+                const originalSubmit = testForm.submit;
+                let wasIntercepted = false;
+                
+                testForm.submit = function() {
+                    wasIntercepted = true;
+                    logToConsole('✓ Intento de envío interceptado');
+                    // Restaurar el método original
+                    testForm.submit = originalSubmit;
+                };
+                
+                try {
+                    // Disparar un evento submit pero prevenir que realmente se envíe
+                    const submitEvent = new Event('submit', { cancelable: true });
+                    testForm.dispatchEvent(submitEvent);
+                    
+                    if (wasIntercepted || submitEvent.defaultPrevented) {
+                        logToConsole('✓ Los formularios tienen event listeners correctamente');
+                    } else {
+                        logToConsole('⚠ Los formularios podrían no tener event listeners');
+                    }
+                } catch (e) {
+                    logToConsole('⚠ Error al verificar event listeners: ' + e.message);
+                }
+            }, 1000);
+        } else {
+            formsStatus.innerHTML = '<span class="text-danger">✗ No se encontraron formularios</span>';
+            logToConsole('✗ No se encontraron formularios de carrito');
+        }
+        
+        // Botones de prueba
+        document.getElementById('test-ajax').addEventListener('click', testAjax);
+        
+        document.getElementById('clear-cart').addEventListener('click', function() {
+            logToConsole('Vaciando carrito de sesión...');
+            
+            // Crear un form temporal para enviar la solicitud
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{% url "store:cart" %}';
+            
+            // Añadir token CSRF
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            form.appendChild(csrfInput);
+            
+            // Añadir campo para vaciar carrito
+            const clearInput = document.createElement('input');
+            clearInput.type = 'hidden';
+            clearInput.name = 'clear_cart';
+            clearInput.value = '1';
+            form.appendChild(clearInput);
+            
+            // Añadir al DOM y enviar
+            document.body.appendChild(form);
+            form.submit();
+        });
+        
+        document.getElementById('reload-js').addEventListener('click', function() {
+            logToConsole('Recargando cart.js...');
+            
+            const oldScript = document.querySelector('script[src*="cart.js"]');
+            if (oldScript) {
+                oldScript.remove();
+            }
+            
+            const newScript = document.createElement('script');
+            newScript.src = '{% static "js/cart.js" %}?v=' + new Date().getTime();
+            document.head.appendChild(newScript);
+            
+            logToConsole('Script recargado. La página debería actualizarse automáticamente en 2 segundos...');
+            
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        });
+        
+        // Iniciar prueba AJAX
+        testAjax();
+        
+        logToConsole('Inicialización de diagnóstico completada');
+    });
+</script>
+
+<!-- Cargar el script del carrito después de nuestro script de diagnóstico -->
+<script src="{% static 'js/cart.js' %}?v={{ request.session.session_key }}"></script>
+{% endblock %}

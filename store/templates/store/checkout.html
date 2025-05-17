@@ -1,0 +1,86 @@
+<!-- store/templates/store/checkout.html -->
+{% extends 'store/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Checkout - Jugos Candy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Checkout</h1>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Información de Contacto</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.customer_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form.customer_phone|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.customer_email|as_crispy_field }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.notes|as_crispy_field }}
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> Tu pedido estará listo para recoger aproximadamente 30 minutos después de confirmarlo.
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success btn-lg mt-3">
+                            <i class="fas fa-check me-2"></i> Confirmar Pedido
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Resumen del Pedido</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in cart_items %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <div>
+                            <span class="fw-bold">{{ item.quantity }}x</span> {{ item.product.name }}
+                        </div>
+                        <span>${{ item.subtotal }}</span>
+                    </div>
+                    {% endfor %}
+                    
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Total:</span>
+                        <span>${{ total }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Instrucciones</h5>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li class="mb-2">Completa el formulario con tus datos de contacto.</li>
+                        <li class="mb-2">Confirma tu pedido dando clic en el botón "Confirmar Pedido".</li>
+                        <li class="mb-2">Recibirás un número de pedido que deberás mostrar al recoger tu pedido.</li>
+                        <li>Paga en efectivo o con tarjeta al recoger tu pedido en nuestra tienda.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
